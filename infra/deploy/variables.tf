@@ -15,9 +15,9 @@ variable "tenant_id" {
   type = string
 }
 
-variable "user_object_id" {
-  type = string
-}
+# variable "user_object_id" {
+#   type = string
+# }
 
 #COMMON VARIABLES
 variable "project_id" {
@@ -43,6 +43,6 @@ variable "asp_os_type" {
 }
 
 #WEB APP VARIABLES
-variable "app_name" {
-  type = string
-}
+# variable "app_name" {
+#   type = string
+# }
