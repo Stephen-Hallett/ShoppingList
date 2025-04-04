@@ -24,14 +24,6 @@ resource "azurerm_storage_table" "lists" {
   storage_account_name = azurerm_storage_account.sa.name
 }
 
-resource "azurerm_service_plan" "asp" {
-  name                = "asp-${var.project_id}-${var.env}-eau-001"
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
-  os_type             = var.asp_os_type
-  sku_name            = var.asp_sku_name
-}
-
 resource "azurerm_container_app_environment" "cae" {
   name                = "cae-${var.project_id}-${var.env}-eau-001"
   location            = data.azurerm_resource_group.rg.location
