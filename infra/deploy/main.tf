@@ -44,6 +44,11 @@ resource "azurerm_container_app" "backend" {
   resource_group_name          = data.azurerm_resource_group.rg.name
   revision_mode                = "Single"
 
+  secret {
+    name  = "ghcr-token"
+    value = var.ghcr-token
+  }
+
   template {
     container {
       name   = "backend"
@@ -51,6 +56,12 @@ resource "azurerm_container_app" "backend" {
       cpu    = 0.25
       memory = "0.5Gi"
     }
+  }
+
+  registry {
+    server               = "ghcr.io"
+    username             = "stephen-hallett"
+    password_secret_name = "ghcr-token"
   }
 }
 
@@ -60,6 +71,20 @@ resource "azurerm_container_app" "frontend" {
   resource_group_name          = data.azurerm_resource_group.rg.name
   revision_mode                = "Single"
 
+  secret {
+    name  = "ghcr-token"
+    value = var.ghcr-token
+  }
+
+  ingress {
+    external_enabled = true
+    target_port      = 6969
+    traffic_weight {
+      percentage = 100
+    }
+  }
+
+
   template {
     container {
       name   = "frontend"
@@ -68,4 +93,11 @@ resource "azurerm_container_app" "frontend" {
       memory = "0.5Gi"
     }
   }
+
+  registry {
+    server               = "ghcr.io"
+    username             = "stephen-hallett"
+    password_secret_name = "ghcr-token"
+  }
+
 }

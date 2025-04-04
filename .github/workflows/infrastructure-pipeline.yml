@@ -7,14 +7,14 @@ on:
     paths:
       - "infra/**"
       - ".github/workflows/infra**"
-  
+
   pull_request:
     branches:
       - dev
     paths:
       - "infra/**"
       - ".github/workflows/infra**"
-  
+
 permissions:
   contents: read
 
@@ -57,7 +57,7 @@ jobs:
         run: |
           echo Environment / Branch name
           echo ${{env.BRANCH_NAME}}
-        
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -75,7 +75,7 @@ jobs:
           echo "ARM_ACCESS_KEY=$( jq -r '.accessKey' <<< $AZURE_CREDENTIALS )" >> $GITHUB_ENV;
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      
+
       - name: Setup terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -102,6 +102,7 @@ jobs:
             -var client_secret=$ARM_CLIENT_SECRET \
             -var subscription_id=$ARM_SUBSCRIPTION_ID \
             -var tenant_id=$ARM_TENANT_ID
+            -var ghcr-token=${{ secrets.GHCR_TOKEN }}
 
       - name: Terraform apply
         if: github.event_name == 'push' && success()

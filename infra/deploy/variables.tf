@@ -15,6 +15,11 @@ variable "tenant_id" {
   type = string
 }
 
+# GHCR Token
+variable "ghcr-token" {
+  type = string
+}
+
 # variable "user_object_id" {
 #   type = string
 # }
@@ -41,8 +46,3 @@ variable "asp_sku_name" {
 variable "asp_os_type" {
   type = string
 }
-
-#WEB APP VARIABLES
-# variable "app_name" {
-#   type = string
-# }
