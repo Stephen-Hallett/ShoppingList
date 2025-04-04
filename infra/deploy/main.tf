@@ -32,10 +32,40 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = var.asp_sku_name
 }
 
-resource "azurerm_container_app_environment" "containerenv" {
+resource "azurerm_container_app_environment" "cae" {
   name                = "cae-${var.project_id}-${var.env}-eau-001"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 }
 
+resource "azurerm_container_app" "backend" {
+  name                         = "ca-${var.project_id}-${var.env}-eau-backend"
+  container_app_environment_id = azurerm_container_app_environment.cae.id
+  resource_group_name          = data.azurerm_resource_group.rg.name
+  revision_mode                = "Single"
 
+  template {
+    container {
+      name   = "backend"
+      image  = "ghcr.io/stephen-hallett/backend:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+    }
+  }
+}
+
+resource "azurerm_container_app" "frontend" {
+  name                         = "ca-${var.project_id}-${var.env}-eau-frontend"
+  container_app_environment_id = azurerm_container_app_environment.cae.id
+  resource_group_name          = data.azurerm_resource_group.rg.name
+  revision_mode                = "Single"
+
+  template {
+    container {
+      name   = "frontend"
+      image  = "ghcr.io/stephen-hallett/frontend:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+    }
+  }
+}
