@@ -1,4 +1,3 @@
-import azure.functions as func
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,7 +21,3 @@ con = Controller()
 @app.get("/test")
 async def test() -> Test:
     return con.test()
-
-
-async def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    return await func.AsgiMiddleware(app).handle_async(req, context)
