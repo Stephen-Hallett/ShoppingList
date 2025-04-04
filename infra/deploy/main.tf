@@ -80,7 +80,8 @@ resource "azurerm_container_app" "frontend" {
     external_enabled = true
     target_port      = 6969
     traffic_weight {
-      percentage = 100
+      percentage      = 100
+      latest_revision = true
     }
   }
 
