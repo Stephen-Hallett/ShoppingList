@@ -71,3 +71,5 @@ jobs:
         uses: azure/container-apps-deploy-action@v1
         with:
           imageToDeploy: ghcr.io/stephen-hallett/frontend:latest
+          containerAppName: ca-shopping-dev-eau-frontend
+          resourceGroup: rg-shopping-dev-eau-001
