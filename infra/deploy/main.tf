@@ -68,6 +68,7 @@ resource "azurerm_container_app" "frontend" {
     value = var.ghcr-token
   }
 
+
   ingress {
     external_enabled = true
     target_port      = 6969
@@ -84,6 +85,11 @@ resource "azurerm_container_app" "frontend" {
       image  = "ghcr.io/stephen-hallett/frontend:latest"
       cpu    = 0.25
       memory = "0.5Gi"
+
+      env {
+        name  = "backend_endpoint"
+        value = "http://${azurerm_container_app.backend.name}"
+      }
     }
   }
 
