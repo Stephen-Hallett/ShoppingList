@@ -37,7 +37,7 @@ jobs:
         with:
           context: ./backend
           push: false
-          tags: ghcr.io/${{ github.repository_owner }}/backend:latest
+          tags: ghcr.io/stephen-hallett/backend:latest
           platforms: linux/amd64
 
       - name: Build and push Docker image
@@ -46,7 +46,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/backend:latest
+          tags: ghcr.io/stephen-hallett/backend:latest
           platforms: linux/amd64
 
   deploy:
@@ -70,4 +70,4 @@ jobs:
       - name: Build and deploy Container App
         uses: azure/container-apps-deploy-action@v1
         with:
-          imageToDeploy: ghcr.io/${{ github.repository_owner }}/backend:latest
+          imageToDeploy: ghcr.io/stephen-hallett/backend:latest
