@@ -14,6 +14,11 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 }
 
+resource "azurerm_storage_table" "users" {
+  name                 = "users"
+  storage_account_name = azurerm_storage_account.sa.name
+}
+
 resource "azurerm_storage_table" "items" {
   name                 = "items"
   storage_account_name = azurerm_storage_account.sa.name
@@ -57,6 +62,11 @@ resource "azurerm_container_app" "backend" {
       image  = "ghcr.io/stephen-hallett/backend:latest"
       cpu    = 0.25
       memory = "0.5Gi"
+
+      env {
+        name  = "TABLE_CONNECTION"
+        value = azurerm_storage_account.sa.primary_connection_string
+      }
     }
   }
 
@@ -98,7 +108,7 @@ resource "azurerm_container_app" "frontend" {
       memory = "0.5Gi"
 
       env {
-        name  = "backend_endpoint"
+        name  = "BACKEND_ENDPOINT"
         value = "https://${azurerm_container_app.backend.name}.internal.${azurerm_container_app_environment.cae.default_domain}"
       }
     }

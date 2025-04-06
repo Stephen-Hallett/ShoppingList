@@ -1,13 +1,7 @@
-import streamlit as st
-import requests
 import os
 
-st.header("What up again big dog")
-test = st.text_input("Endpoint")
+import requests
+import streamlit as st
 
-st.write(f"{os.environ["backend_endpoint"]}/test")
-st.write(f"{test}/test")
-try:
-    st.write(requests.get(f"{test}/test").text)
-except Exception as e:
-    st.write(e)
+st.header("What up again big dog")
+st.write(requests.get(f"{os.environ['BACKEND_ENDPOINT']}/test").text)
