@@ -7,4 +7,7 @@ test = st.text_input("Endpoint")
 
 st.write(f"{os.environ["backend_endpoint"]}/test")
 st.write(f"{test}/test")
-st.write(requests.get(f"{test}/test").text)
+try:
+    st.write(requests.get(f"{test}/test").text)
+except Exception as e:
+    st.write(e)
