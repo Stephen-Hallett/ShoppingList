@@ -41,6 +41,16 @@ resource "azurerm_container_app" "backend" {
     value = var.ghcr-token
   }
 
+  ingress {
+    external_enabled           = false
+    allow_insecure_connections = false
+    target_port                = 8000
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
   template {
     container {
       name   = "backend"
@@ -88,7 +98,7 @@ resource "azurerm_container_app" "frontend" {
 
       env {
         name  = "backend_endpoint"
-        value = "http://${azurerm_container_app.backend.name}"
+        value = "https://${azurerm_container_app.backend.ingress.fqdn}"
       }
     }
   }
