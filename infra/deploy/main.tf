@@ -99,7 +99,7 @@ resource "azurerm_container_app" "frontend" {
 
       env {
         name  = "backend_endpoint"
-        value = "http://${azurerm_container_app.backend.name}.${azurerm_container_app_environment.cae.name}.internal:8000"
+        value = "https://${azurerm_container_app.backend.name}.internal.${azurerm_container_app_environment.cae.default_domain}"
       }
     }
   }
