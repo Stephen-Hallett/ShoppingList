@@ -1,0 +1,13 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "FastAPI backend server to create & update shopping lists."
+requires-python = ">=3.12"
+dependencies = [
+    "azure-core>=1.33.0",
+    "azure-data-tables>=12.6.0",
+    "fastapi>=0.115.12",
+    "pydantic[email]>=2.11.2",
+    "pydantic-settings>=2.8.1",
+    "uvicorn[standard]>=0.34.0",
+]
