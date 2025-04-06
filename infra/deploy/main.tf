@@ -68,6 +68,7 @@ resource "azurerm_container_app" "backend" {
 }
 
 resource "azurerm_container_app" "frontend" {
+  depends_on                   = [azurerm_container_app.backend]
   name                         = "ca-${var.project_id}-${var.env}-eau-frontend"
   container_app_environment_id = azurerm_container_app_environment.cae.id
   resource_group_name          = data.azurerm_resource_group.rg.name
