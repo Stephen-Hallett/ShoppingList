@@ -7,13 +7,10 @@ from azure.data.tables import TableServiceClient, UpdateMode
 from .schemas import (
     Item,
     ItemCreate,
-    Itemmap,
-    ItemmapCreate,
-    ItemmapUpdate,
     ItemUpdate,
-    List,
-    ListCreate,
-    ListUpdate,
+    ShoppingList,
+    ShoppingListCreate,
+    ShoppingListUpdate,
     Test,
     User,
     UserCreate,
@@ -31,9 +28,8 @@ class Controller:
             conn_str=os.environ["TABLE_CONNECTION"]
         )
         self.users_table_client = self.table_service.get_table_client("users")
-        self.lists_table_client = self.table_service.get_table_client("lists")
+        self.shoppinglists_table_client = self.table_service.get_table_client("lists")
         self.items_table_client = self.table_service.get_table_client("items")
-        self.itemmaps_table_client = self.table_service.get_table_client("itemmap")
 
     @log
     def test(self) -> Test:
@@ -77,37 +73,54 @@ class Controller:
         self.users_table_client.delete_entity(partition_key="user", row_key=user_id)
         return {"message": f"User {user_id} deleted"}
 
-    # Lists db
+    # ShoppingLists db
     @log
-    def create_list(self, _list: ListCreate) -> List:
+    def create_shoppinglist(self, shoppinglist: ShoppingListCreate) -> ShoppingList:
         row_key = str(uuid4())
-        entity = {"PartitionKey": "list", "RowKey": row_key, "name": _list.name}
-        self.lists_table_client.create_entity(entity=entity)
-        return List(id=row_key, **_list.model_dump())
+        entity = {
+            "PartitionKey": "shoppinglist",
+            "RowKey": row_key,
+            "name": shoppinglist.name,
+            "items": shoppinglist.items,
+        }
+        self.shoppinglists_table_client.create_entity(entity=entity)
+        return ShoppingList(id=row_key, **shoppinglist.model_dump())
 
     @log
-    def get_list(self, list_id: str) -> List:
-        entity = self.lists_table_client.get_entity(
-            partition_key="list", row_key=list_id
+    def get_shoppinglist(self, shoppinglist_id: str) -> ShoppingList:
+        entity = self.shoppinglists_table_client.get_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
         )
-        return List(id=entity["RowKey"], name=entity["name"])
-
-    @log
-    def update_list(self, list_id: str, _list: ListUpdate) -> List:
-        entity = self.lists_table_client.get_entity(
-            partition_key="list", row_key=list_id
+        return ShoppingList(
+            id=entity["RowKey"], name=entity["name"], items=entity["items"]
         )
 
-        if _list.name is not None:
-            entity["name"] = _list.name
+    @log
+    def update_shoppinglist(
+        self, shoppinglist_id: str, shoppinglist: ShoppingListUpdate
+    ) -> ShoppingList:
+        entity = self.shoppinglists_table_client.get_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
+        )
 
-        self.lists_table_client.update_entity(entity=entity, mode=UpdateMode.REPLACE)
-        return List(id=list_id, name=entity["name"])
+        if shoppinglist.name is not None:
+            entity["name"] = shoppinglist.name
+        if shoppinglist.items is not None:
+            entity["items"] = shoppinglist.items
+
+        self.shoppinglists_table_client.update_entity(
+            entity=entity, mode=UpdateMode.REPLACE
+        )
+        return ShoppingList(
+            id=shoppinglist_id, name=entity["name"], items=entity["items"]
+        )
 
     @log
-    def delete_list(self, list_id: str) -> dict:
-        self.lists_table_client.delete_entity(partition_key="list", row_key=list_id)
-        return {"message": f"List {list_id} deleted"}
+    def delete_shoppinglist(self, shoppinglist_id: str) -> dict:
+        self.shoppinglists_table_client.delete_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
+        )
+        return {"message": f"ShoppingList {shoppinglist_id} deleted"}
 
     # Items db
     @log
@@ -140,42 +153,3 @@ class Controller:
     def delete_item(self, item_id: str) -> dict:
         self.items_table_client.delete_entity(partition_key="item", row_key=item_id)
         return {"message": f"Item {item_id} deleted"}
-
-    # Itemmaps db
-    @log
-    def create_itemmap(self, itemmap: ItemmapCreate) -> Itemmap:
-        row_key = str(uuid4())
-        entity = {
-            "PartitionKey": "itemmap",
-            "RowKey": row_key,
-            "item_id": itemmap.item_id,
-            "list_id": itemmap.list_id,
-        }
-        self.itemmaps_table_client.create_entity(entity=entity)
-        return Itemmap(id=row_key, **itemmap.model_dump())
-
-    @log
-    def get_itemmap(self, itemmap_id: str) -> Itemmap:
-        entity = self.itemmaps_table_client.get_entity(
-            partition_key="itemmap", row_key=itemmap_id
-        )
-        return Itemmap(id=entity["RowKey"], name=entity["name"])
-
-    @log
-    def update_itemmap(self, itemmap_id: str, itemmap: ItemmapUpdate) -> Itemmap:
-        entity = self.itemmaps_table_client.get_entity(
-            partition_key="itemmap", row_key=itemmap_id
-        )
-
-        if itemmap.name is not None:
-            entity["name"] = itemmap.name
-
-        self.itemmaps_table_client.update_entity(entity=entity, mode=UpdateMode.REPLACE)
-        return Itemmap(id=itemmap_id, name=entity["name"])
-
-    @log
-    def delete_itemmap(self, itemmap_id: str) -> dict:
-        self.itemmaps_table_client.delete_entity(
-            partition_key="itemmap", row_key=itemmap_id
-        )
-        return {"message": f"Itemmap {itemmap_id} deleted"}

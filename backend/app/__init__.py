@@ -3,7 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .controller import Controller
-from .schemas import List, ListCreate, ListUpdate, Test, User, UserCreate, UserUpdate
+from .schemas import (
+    Item,
+    ItemCreate,
+    ItemUpdate,
+    ShoppingList,
+    ShoppingListCreate,
+    ShoppingListUpdate,
+    Test,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 app = FastAPI()
 app.add_middleware(
@@ -51,31 +62,62 @@ async def delete_user(user_id: str) -> dict:
         raise HTTPException(status_code=404, detail="User not found")
 
 
-# Lists
-@app.post("/lists", response_model=List)
-async def create_list(_list: ListCreate) -> List:
-    return con.create_list(_list)
+# ShoppingLists
+@app.post("/shoppinglists", response_model=ShoppingList)
+async def create_shoppinglist(shoppinglist: ShoppingListCreate) -> ShoppingList:
+    return con.create_shoppinglist(shoppinglist)
 
 
-@app.get("/lists/{list_id}", response_model=List)
-async def get_list(list_id: str) -> List:
+@app.get("/shoppinglists/{shoppinglist_id}", response_model=ShoppingList)
+async def get_shoppinglist(shoppinglist_id: str) -> ShoppingList:
     try:
-        return con.get_list(list_id)
+        return con.get_shoppinglist(shoppinglist_id)
     except:
-        raise HTTPException(status_code=404, detail="List not found")
+        raise HTTPException(status_code=404, detail="ShoppingList not found")
 
 
-@app.put("/lists/{list_id}", response_model=List)
-async def update_list(list_id: str, _list: ListUpdate) -> List:
+@app.put("/shoppinglists/{shoppinglist_id}", response_model=ShoppingList)
+async def update_shoppinglist(
+    shoppinglist_id: str, shoppinglist: ShoppingListUpdate
+) -> ShoppingList:
     try:
-        return con.update_list(list_id, _list)
+        return con.update_shoppinglist(shoppinglist_id, shoppinglist)
     except:
-        raise HTTPException(status_code=404, detail="List not found")
+        raise HTTPException(status_code=404, detail="ShoppingList not found")
 
 
-@app.delete("/lists/{list_id}")
-async def delete_list(list_id: str) -> dict:
+@app.delete("/shoppinglists/{shoppinglist_id}")
+async def delete_shoppinglist(shoppinglist_id: str) -> dict:
     try:
-        return con.delete_list(list_id)
+        return con.delete_shoppinglist(shoppinglist_id)
     except:
-        raise HTTPException(status_code=404, detail="List not found")
+        raise HTTPException(status_code=404, detail="ShoppingList not found")
+
+
+@app.post("/items", response_model=Item)
+async def create_item(item: ItemCreate) -> Item:
+    return con.create_item(item)
+
+
+@app.get("/items/{item_id}", response_model=Item)
+async def get_item(item_id: str) -> Item:
+    try:
+        return con.get_item(item_id)
+    except:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@app.put("/items/{item_id}", response_model=Item)
+async def update_item(item_id: str, item: ItemUpdate) -> Item:
+    try:
+        return con.update_item(item_id, item)
+    except:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@app.delete("/items/{item_id}")
+async def delete_item(item_id: str) -> dict:
+    try:
+        return con.delete_item(item_id)
+    except:
+        raise HTTPException(status_code=404, detail="Item not found")
