@@ -19,3 +19,16 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     name: str | None = None
+
+
+class List(BaseModel):
+    id: str  # will be RowKey
+    name: str
+
+
+class ListCreate(BaseModel):
+    name: str
+
+
+class ListUpdate(BaseModel):
+    name: str | None = None
