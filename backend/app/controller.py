@@ -73,6 +73,13 @@ class Controller:
         self.users_table_client.delete_entity(partition_key="user", row_key=user_id)
         return {"message": f"User {user_id} deleted"}
 
+    @log
+    def list_users(self) -> list[User]:
+        all_entities = list(self.users_table_client.list_entities())
+        for entity in all_entities:
+            entity["id"] = entity["RowKey"]
+        return [User.model_validate(entity) for entity in all_entities]
+
     # ShoppingLists db
     @log
     def create_shoppinglist(self, shoppinglist: ShoppingListCreate) -> ShoppingList:
@@ -122,6 +129,13 @@ class Controller:
         )
         return {"message": f"ShoppingList {shoppinglist_id} deleted"}
 
+    @log
+    def list_shoppinglists(self) -> list[ShoppingList]:
+        all_entities = list(self.shoppinglists_table_client.list_entities())
+        for entity in all_entities:
+            entity["id"] = entity["RowKey"]
+        return [ShoppingList.model_validate(entity) for entity in all_entities]
+
     # Items db
     @log
     def create_item(self, item: ItemCreate) -> Item:
@@ -153,3 +167,10 @@ class Controller:
     def delete_item(self, item_id: str) -> dict:
         self.items_table_client.delete_entity(partition_key="item", row_key=item_id)
         return {"message": f"Item {item_id} deleted"}
+
+    @log
+    def list_items(self) -> list[Item]:
+        all_entities = list(self.items_table_client.list_entities())
+        for entity in all_entities:
+            entity["id"] = entity["RowKey"]
+        return [Item.model_validate(entity) for entity in all_entities]

@@ -33,6 +33,11 @@ async def test() -> Test:
     return con.test()
 
 
+@app.get("/users/list", response_model=list[User])
+async def list_users() -> list[User]:
+    return con.list_users()
+
+
 @app.post("/users", response_model=User)
 async def create_user(user: UserCreate) -> User:
     return con.create_user(user)
@@ -63,6 +68,11 @@ async def delete_user(user_id: str) -> dict:
 
 
 # ShoppingLists
+@app.get("/shoppinglists/list", response_model=list[ShoppingList])
+async def list_shoppinglists() -> list[ShoppingList]:
+    return con.list_shoppinglists()
+
+
 @app.post("/shoppinglists", response_model=ShoppingList)
 async def create_shoppinglist(shoppinglist: ShoppingListCreate) -> ShoppingList:
     return con.create_shoppinglist(shoppinglist)
@@ -92,6 +102,12 @@ async def delete_shoppinglist(shoppinglist_id: str) -> dict:
         return con.delete_shoppinglist(shoppinglist_id)
     except:
         raise HTTPException(status_code=404, detail="ShoppingList not found")
+
+
+# Items
+@app.get("/items/list", response_model=list[Item])
+async def list_items() -> list[Item]:
+    return con.list_items()
 
 
 @app.post("/items", response_model=Item)
