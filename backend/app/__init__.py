@@ -1,3 +1,4 @@
+from azure.core.exceptions import ResourceExistsError
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -40,7 +41,10 @@ async def list_users() -> list[User]:
 
 @app.post("/users", response_model=User)
 async def create_user(user: UserCreate) -> User:
-    return con.create_user(user)
+    try:
+        return con.create_user(user)
+    except ResourceExistsError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @app.get("/users/{user_id}", response_model=User)
@@ -75,7 +79,10 @@ async def list_shoppinglists() -> list[ShoppingList]:
 
 @app.post("/shoppinglists", response_model=ShoppingList)
 async def create_shoppinglist(shoppinglist: ShoppingListCreate) -> ShoppingList:
-    return con.create_shoppinglist(shoppinglist)
+    try:
+        return con.create_shoppinglist(shoppinglist)
+    except ResourceExistsError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @app.get("/shoppinglists/{shoppinglist_id}", response_model=ShoppingList)
@@ -112,7 +119,10 @@ async def list_items() -> list[Item]:
 
 @app.post("/items", response_model=Item)
 async def create_item(item: ItemCreate) -> Item:
-    return con.create_item(item)
+    try:
+        return con.create_item(item)
+    except ResourceExistsError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @app.get("/items/{item_id}", response_model=Item)
