@@ -38,11 +38,7 @@ variable "location" {
   default = "australiaeast"
 }
 
-#APP SERVICE PLAN VARIABLES
-variable "asp_sku_name" {
+variable "hash_key" {
   type = string
 }
 
-variable "asp_os_type" {
-  type = string
-}
