@@ -67,6 +67,11 @@ resource "azurerm_container_app" "backend" {
         name  = "TABLE_CONNECTION"
         value = azurerm_storage_account.sa.primary_connection_string
       }
+
+      env {
+        name  = "HASH_KEY"
+        value = var.hash_key
+      }
     }
   }
 
@@ -110,6 +115,11 @@ resource "azurerm_container_app" "frontend" {
       env {
         name  = "BACKEND_ENDPOINT"
         value = "https://${azurerm_container_app.backend.name}.internal.${azurerm_container_app_environment.cae.default_domain}"
+      }
+
+      env {
+        name  = "HASH_KEY"
+        value = var.hash_key
       }
     }
   }

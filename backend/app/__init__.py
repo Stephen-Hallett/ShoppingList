@@ -7,7 +7,6 @@ from .controller import Controller
 from .schemas import (
     Item,
     ItemCreate,
-    ItemUpdate,
     ShoppingList,
     ShoppingListCreate,
     ShoppingListUpdate,
@@ -133,12 +132,12 @@ async def get_item(item_id: str) -> Item:
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@app.put("/items/{item_id}", response_model=Item)
-async def update_item(item_id: str, item: ItemUpdate) -> Item:
-    try:
-        return con.update_item(item_id, item)
-    except:
-        raise HTTPException(status_code=404, detail="Item not found")
+# @app.put("/items/{item_id}", response_model=Item)
+# async def update_item(item_id: str, item: ItemUpdate) -> Item:
+#     try:
+#         return con.update_item(item_id, item)
+#     except:
+#         raise HTTPException(status_code=404, detail="Item not found")
 
 
 @app.delete("/items/{item_id}")
