@@ -102,7 +102,7 @@ jobs:
             -var client_secret=$ARM_CLIENT_SECRET \
             -var subscription_id=$ARM_SUBSCRIPTION_ID \
             -var tenant_id=$ARM_TENANT_ID \
-            -var ghcr-token=${{ secrets.GHCR_TOKEN }}
+            -var ghcr-token=${{ secrets.GHCR_TOKEN }} \
             -var hash_key=${{ secrets.HASH_KEY }}
 
       - name: Terraform apply
