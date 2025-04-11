@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def make_rowid(primaryKey: str, secret_key: str = os.environ["HASH_KEY"]) -> str:
-    message = primaryKey.encode("utf-8")
+    message = primaryKey.lower().strip().encode("utf-8")
     key = secret_key.encode("utf-8")
 
     digest = hmac.new(key, message, hashlib.sha256).digest()
@@ -48,11 +48,11 @@ class Controller:
 
     @log
     def create_user(self, user: UserCreate) -> User:
-        row_key = make_rowid(user.email.lower().strip())
+        row_key = make_rowid(user.email)
         entity = {
             "PartitionKey": "user",
             "RowKey": row_key,
-            "email": user.email.lower().strip(),
+            "email": user.email,
             "name": user.name.strip(),
         }
         try:
@@ -96,9 +96,7 @@ class Controller:
     # ShoppingLists db
     @log
     def create_shoppinglist(self, shoppinglist: ShoppingListCreate) -> ShoppingList:
-        row_key = make_rowid(
-            f"{shoppinglist.name.lower().strip()}_{shoppinglist.owner.lower().strip()}"
-        )
+        row_key = make_rowid(f"{shoppinglist.name}_{shoppinglist.owner}")
         entity = {
             "PartitionKey": "shoppinglist",
             "RowKey": row_key,
@@ -170,7 +168,7 @@ class Controller:
     # Items db
     @log
     def create_item(self, item: ItemCreate) -> Item:
-        row_key = make_rowid(item.name.lower().strip())
+        row_key = make_rowid(item.name)
         entity = {"PartitionKey": "item", "RowKey": row_key, "name": item.name}
         try:
             self.items_table_client.create_entity(entity=entity)
