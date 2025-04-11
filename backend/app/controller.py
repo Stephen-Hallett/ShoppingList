@@ -18,6 +18,7 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
+    EmailRequest
 )
 from .util import log
 
@@ -157,13 +158,56 @@ class Controller:
         return {"message": f"ShoppingList {shoppinglist_id} deleted"}
 
     @log
-    def list_shoppinglists(self) -> list[ShoppingList]:
+    def list_shoppinglists(self, user_id: str) -> list[ShoppingList]:
         all_entities = list(self.shoppinglists_table_client.list_entities())
         for entity in all_entities:
             entity["id"] = entity["RowKey"]
             entity["members"] = json.loads(entity["members"])
             entity["items"] = json.loads(entity["items"])
-        return [ShoppingList.model_validate(entity) for entity in all_entities]
+        return [
+            ShoppingList.model_validate(entity)
+            for entity in all_entities
+            if user_id in [entity["owner"], *entity["members"]]
+        ]
+    
+    def invite_to_shopping(self, shoppinglist_id: str, email: EmailRequest):
+        print(email)
+        entity = self.shoppinglists_table_client.get_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
+        )
+        current_members = json.loads(entity["members"])
+        if make_rowid(email.email) not in current_members:
+            entity["members"] = json.dumps([*current_members, make_rowid(email.email)])
+            self.shoppinglists_table_client.update_entity(
+                entity=entity, mode=UpdateMode.REPLACE
+            )
+        return ShoppingList(
+            id=shoppinglist_id,
+            name=entity["name"],
+            owner=entity["owner"],
+            items=json.loads(entity["items"]),
+            members=json.loads(entity["members"]),
+        )
+    
+    def delete_from_shopping(self, shoppinglist_id: str, email: EmailRequest):
+        entity = self.shoppinglists_table_client.get_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
+        )
+        current_members = json.loads(entity["members"])
+        if make_rowid(email.email) in current_members:
+            current_members.remove(make_rowid(email.email))
+            entity["members"] = json.dumps(current_members)
+            self.shoppinglists_table_client.update_entity(
+                entity=entity, mode=UpdateMode.REPLACE
+            )
+        return ShoppingList(
+            id=shoppinglist_id,
+            name=entity["name"],
+            owner=entity["owner"],
+            items=json.loads(entity["items"]),
+            members=json.loads(entity["members"]),
+        )
+
 
     # Items db
     @log

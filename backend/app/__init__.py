@@ -14,6 +14,7 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
+    EmailRequest
 )
 
 app = FastAPI()
@@ -71,9 +72,9 @@ async def delete_user(user_id: str) -> dict:
 
 
 # ShoppingLists
-@app.get("/shoppinglists/list", response_model=list[ShoppingList])
-async def list_shoppinglists() -> list[ShoppingList]:
-    return con.list_shoppinglists()
+@app.get("/shoppinglists/{user_id}/list", response_model=list[ShoppingList])
+async def list_shoppinglists(user_id: str) -> list[ShoppingList]:
+    return con.list_shoppinglists(user_id)
 
 
 @app.post("/shoppinglists", response_model=ShoppingList)
@@ -108,6 +109,29 @@ async def delete_shoppinglist(shoppinglist_id: str) -> dict:
         return con.delete_shoppinglist(shoppinglist_id)
     except:
         raise HTTPException(status_code=404, detail="ShoppingList not found")
+
+
+@app.put(
+    "/shoppinglists/{shoppinglist_id}/members/invite", response_model=ShoppingList
+)
+async def invite_to_shopping(shoppinglist_id: str, email: EmailRequest) -> ShoppingList:
+    try:
+        return con.invite_to_shopping(shoppinglist_id, email)
+    except:
+        raise HTTPException(
+            status_code=404, detail=f"Couldn't invite {email} to the shopping list"
+        )
+
+@app.delete(
+    "/shoppinglists/{shoppinglist_id}/members/delete", response_model=ShoppingList
+)
+async def delete_from_shopping(shoppinglist_id: str, email: EmailRequest) -> ShoppingList:
+    try:
+        return con.delete_from_shopping(shoppinglist_id, email)
+    except:
+        raise HTTPException(
+            status_code=404, detail=f"Couldn't remove {email} from the shopping list"
+        )
 
 
 # Items

@@ -19,7 +19,7 @@ def set_vars() -> None:
     st.session_state["user"] = st.session_state.get("user", None)
     if st.session_state.user is not None:
         st.session_state.shopping_lists = requests.get(
-            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/list", timeout=300
+            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{st.session_state.user['id']}/list", timeout=300
         ).json()
 
 
@@ -107,6 +107,16 @@ def delete_list(tab: str) -> None:
                 st.success(f"Deleted {tab['name']} shopping list.")
             st.rerun()
 
+@st.dialog("Invite User")
+def invite_user(shopping_list: dict) -> None:
+    new_user = st.text_input("User Email").capitalize()
+    if st.button("Invite User"):
+        _ = requests.put(
+            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/members/invite",
+            json={"email": new_user},
+            timeout=300,
+        ).json()
+        st.rerun()
 
 def app() -> None:
     header_col1, _, header_col2 = st.columns([2, 3, 1])
@@ -140,7 +150,7 @@ def app() -> None:
                         if st.button(
                             "Invite User", key=f"invite_{tab}", use_container_width=True
                         ):
-                            pass
+                            invite_user(st.session_state.shopping_lists[i])
                     with delete_col:
                         if st.button(
                             "Delete List", key=f"delete_{tab}", use_container_width=True
