@@ -8,7 +8,7 @@ import streamlit as st
 
 
 def make_rowid(primaryKey: str, secret_key: str = os.environ["HASH_KEY"]) -> str:
-    message = primaryKey.encode("utf-8")
+    message = primaryKey.encode("utf-8").lower().strip()
     key = secret_key.encode("utf-8")
 
     digest = hmac.new(key, message, hashlib.sha256).digest()
@@ -43,7 +43,7 @@ def signup() -> None:
     username = st.text_input("Username")
     email = st.text_input("Email")
     if st.button("Submit"):
-        user = {"name": username, "email": email}
+        user = {"name": username.capitalize(), "email": email}
         new_user = requests.post(
             f"{os.environ['BACKEND_ENDPOINT']}/users", json=user, timeout=300
         ).json()
@@ -56,23 +56,39 @@ def signup() -> None:
 
 
 @st.dialog("Add item")
-def add_item():
-    pass
+def add_item(shopping_list: dict) -> None:
+    new_item = st.text_input("Item").capitalize()
+    item_id = make_rowid(new_item)
+    if st.button("Add item"):
+        _ = requests.post(
+            f"{os.environ['BACKEND_ENDPOINT']}/items",
+            json={"name": new_item},
+            timeout=300,
+        ).json()
+        if item_id not in shopping_list["items"]:
+            shopping_list["items"].append(item_id)
+            _ = requests.put(
+                f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}",
+                json=shopping_list,
+                timeout=300,
+            ).json()
+        else:
+            st.error(f"{new_item} is already in the {shopping_list['name']} list.")
+        st.rerun()
 
 
 @st.dialog("Make Shopping List")
-def make_list():
+def make_list() -> None:
     name = st.text_input("Shopping List Name:")
     if st.button("Submit"):
-        list = {"name": name, "owner": st.session_state.user["id"]}
-        new_user = requests.post(
-            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists", json=list, timeout=300
+        slist = {"name": name.capitalize(), "owner": st.session_state.user["id"]}
+        new_list = requests.post(
+            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists", json=slist, timeout=300
         ).json()
-        if "detail" in new_user:
-            st.error(new_user["detail"])
+        if "detail" in new_list:
+            st.error(new_list["detail"])
         else:
             st.success(f"Created {list['name']} shopping list.")
-            st.session_state.user = new_user
         st.rerun()
 
 
@@ -92,43 +108,78 @@ def delete_list(tab: str) -> None:
             st.rerun()
 
 
-def main() -> None:
-    set_vars()
-    header_col1, header_col2 = st.columns([1, 1])
+def app() -> None:
+    header_col1, _, header_col2 = st.columns([2, 3, 1])
     with header_col1:
         st.title("Shopping List")
     with header_col2:
         st.write("")
         login_col, signup_col = st.columns([1, 1])
         with login_col:
-            if st.button("Login", type="primary"):
+            if st.button("Login", type="primary", use_container_width=True):
                 login()
         with signup_col:
-            if st.button("Sign up", type="primary"):
+            if st.button("Sign up", type="primary", use_container_width=True):
                 signup()
     st.divider()
 
     if st.session_state.user is not None:
-        new_col, _, delete_col = st.columns([1, 4, 1])
+        message_col, _, new_col = st.columns([2, 3, 1])
         with new_col:
-            if st.button("New list"):
+            if st.button("New list", use_container_width=True):
                 make_list()
+        with message_col:
+            st.markdown(f"### 👋 Hello, {st.session_state.user['name']}")
+            st.write("")
         if len(st.session_state.shopping_lists):
             tabs = st.tabs([slist["name"] for slist in st.session_state.shopping_lists])
             for i, tab in enumerate(tabs):
-                with delete_col:
-                    if st.button("Delete list", key=f"delete_{tab}"):
-                        delete_list(st.session_state.shopping_lists[i])
                 with tab:
-                    if st.button(
-                        "+ Add item",
-                        type="primary",
-                        use_container_width=True,
-                        key=f"item_{tab}",
-                    ):
-                        add_item()
-                    st.write("test")
+                    item_col, invite_col, delete_col = st.columns([4, 1, 1])
+                    with invite_col:
+                        if st.button(
+                            "Invite User", key=f"invite_{tab}", use_container_width=True
+                        ):
+                            pass
+                    with delete_col:
+                        if st.button(
+                            "Delete List", key=f"delete_{tab}", use_container_width=True
+                        ):
+                            delete_list(st.session_state.shopping_lists[i])
+                    with item_col:
+                        if st.button(
+                            ":material/add_circle: Add item",
+                            type="primary",
+                            use_container_width=True,
+                            key=f"item_{tab}",
+                        ):
+                            add_item(st.session_state.shopping_lists[i])
+
+                    for item_id in st.session_state.shopping_lists[i]["items"]:
+                        with st.container(border=True):
+                            info, button = st.columns([5, 1])
+                            with info:
+                                item_name = requests.get(
+                                    f"{os.environ['BACKEND_ENDPOINT']}/items/{item_id}"
+                                ).json()["name"]
+                                st.markdown(f"**{item_name}**")
+                            with button:
+                                if st.button(
+                                    ":material/delete: Delete",
+                                    use_container_width=True,
+                                    type="primary",
+                                    key=f"delete_{item_id}"
+                                ):
+                                    pass
+
+
+def main() -> None:
+    set_vars()
+    app()
 
 
 if __name__ == "__main__":
+    st.set_page_config(
+        page_title="Shopping Lists", layout="wide", page_icon=":material/shopping_cart:"
+    )
     main()
