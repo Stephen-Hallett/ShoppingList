@@ -147,7 +147,7 @@ def delete_item(shopping_list: dict, item: str) -> None:
         st.rerun()
 
 def app() -> None:
-    header_col1, _, header_col2 = st.columns([2, 3, 1])
+    header_col1, _, header_col2 = st.columns([1,1,1])
     with header_col1:
         st.title("Shopping List")
     with header_col2:
