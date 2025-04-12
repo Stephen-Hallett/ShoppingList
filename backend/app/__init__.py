@@ -14,7 +14,8 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
-    EmailRequest
+    EmailRequest,
+    ItemName
 )
 
 app = FastAPI()
@@ -131,6 +132,17 @@ async def delete_from_shopping(shoppinglist_id: str, email: EmailRequest) -> Sho
     except:
         raise HTTPException(
             status_code=404, detail=f"Couldn't remove {email} from the shopping list"
+        )
+    
+@app.delete(
+    "/shoppinglists/{shoppinglist_id}/items/delete", response_model=ShoppingList
+)
+async def delete_item_from_shopping(shoppinglist_id: str, item: ItemName) -> ShoppingList:
+    try:
+        return con.delete_item_from_shopping(shoppinglist_id, item)
+    except:
+        raise HTTPException(
+            status_code=404, detail=f"Couldn't remove {item['item']} from the shopping list"
         )
 
 

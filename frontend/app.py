@@ -107,13 +107,38 @@ def delete_list(tab: str) -> None:
                 st.success(f"Deleted {tab['name']} shopping list.")
             st.rerun()
 
-@st.dialog("Invite User")
-def invite_user(shopping_list: dict) -> None:
+@st.dialog("Users")
+def manage_users(shopping_list: dict) -> None:
     new_user = st.text_input("User Email").capitalize()
-    if st.button("Invite User"):
-        _ = requests.put(
-            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/members/invite",
-            json={"email": new_user},
+    if st.button("Invite User", type="primary"):
+        invited_user = requests.get(f"{os.environ['BACKEND_ENDPOINT']}/users/{make_rowid(new_user)}").json()
+        if "detail" in invited_user:
+            st.error(f"There is no user with the email {new_user}")
+        else:
+            _ = requests.put(
+                f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/members/invite",
+                json={"email": new_user},
+                timeout=300,
+            ).json()
+        st.rerun()
+    st.write("Remove users")
+    invited_users = [requests.get(f"{os.environ['BACKEND_ENDPOINT']}/users/{user_id}").json() for user_id in shopping_list["members"]]
+    selected_user = st.pills("Users", [user["name"] for user in invited_users])
+    if selected_user is not None:
+        if st.button(f"Remove {selected_user} from {shopping_list['name']} list?", type="primary"):
+            _ = requests.delete(
+                f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/members/delete",
+                json={"email": [user for user in invited_users if user["name"] == selected_user][0]["email"]},
+                timeout=300,
+            ).json()
+            st.rerun()
+
+
+
+def delete_item(shopping_list: dict, item: str) -> None:
+        _ = requests.delete(
+            f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/items/delete",
+            json={"item": item},
             timeout=300,
         ).json()
         st.rerun()
@@ -148,9 +173,9 @@ def app() -> None:
                     item_col, invite_col, delete_col = st.columns([4, 1, 1])
                     with invite_col:
                         if st.button(
-                            "Invite User", key=f"invite_{tab}", use_container_width=True
+                            "Users", key=f"invite_{tab}", use_container_width=True
                         ):
-                            invite_user(st.session_state.shopping_lists[i])
+                            manage_users(st.session_state.shopping_lists[i])
                     with delete_col:
                         if st.button(
                             "Delete List", key=f"delete_{tab}", use_container_width=True
@@ -180,7 +205,7 @@ def app() -> None:
                                     type="primary",
                                     key=f"delete_{item_id}"
                                 ):
-                                    pass
+                                    delete_item(st.session_state.shopping_lists[i], item_name)
 
 
 def main() -> None:

@@ -50,3 +50,6 @@ class ShoppingListUpdate(BaseModel):
 
 class EmailRequest(BaseModel):
     email: EmailStr
+
+class ItemName(BaseModel):
+    item: str

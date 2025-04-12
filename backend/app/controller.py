@@ -18,7 +18,8 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
-    EmailRequest
+    EmailRequest,
+    ItemName
 )
 from .util import log
 
@@ -197,6 +198,25 @@ class Controller:
         if make_rowid(email.email) in current_members:
             current_members.remove(make_rowid(email.email))
             entity["members"] = json.dumps(current_members)
+            self.shoppinglists_table_client.update_entity(
+                entity=entity, mode=UpdateMode.REPLACE
+            )
+        return ShoppingList(
+            id=shoppinglist_id,
+            name=entity["name"],
+            owner=entity["owner"],
+            items=json.loads(entity["items"]),
+            members=json.loads(entity["members"]),
+        )
+    
+    def delete_item_from_shopping(self, shoppinglist_id: str, item: ItemName):
+        entity = self.shoppinglists_table_client.get_entity(
+            partition_key="shoppinglist", row_key=shoppinglist_id
+        )
+        current_items = json.loads(entity["items"])
+        if make_rowid(item.item) in current_items:
+            current_items.remove(make_rowid(item.item))
+            entity["items"] = json.dumps(current_items)
             self.shoppinglists_table_client.update_entity(
                 entity=entity, mode=UpdateMode.REPLACE
             )
