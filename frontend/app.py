@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 import os
-from time.time import sleep
+from time import sleep
 
 import requests
 import streamlit as st
