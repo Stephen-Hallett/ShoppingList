@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import os
+from time.time import sleep
 
 import requests
 import streamlit as st
@@ -16,6 +17,7 @@ def make_rowid(primaryKey: str, secret_key: str = os.environ["HASH_KEY"]) -> str
 
 
 def set_vars() -> None:
+    sleep(0.2)
     if "id" in st.query_params:
         st.session_state["user"] = requests.get(f"{os.environ['BACKEND_ENDPOINT']}/users/{st.query_params.id}").json()
     else:
