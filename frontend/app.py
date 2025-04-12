@@ -16,7 +16,10 @@ def make_rowid(primaryKey: str, secret_key: str = os.environ["HASH_KEY"]) -> str
 
 
 def set_vars() -> None:
-    st.session_state["user"] = st.session_state.get("user", None)
+    if "id" in st.query_params:
+        st.session_state["user"] = requests.get(f"{os.environ['BACKEND_ENDPOINT']}/users/{st.query_params.id}").json()
+    else:
+        st.session_state["user"] = None
     if st.session_state.user is not None:
         st.session_state.shopping_lists = requests.get(
             f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{st.session_state.user['id']}/list", timeout=300
@@ -34,7 +37,7 @@ def login() -> None:
             st.error(user["detail"])
         else:
             st.success(f"Welcome back {user['name']}")
-            st.session_state.user = user
+            st.query_params.id=user["id"]
         st.rerun()
 
 
@@ -51,7 +54,7 @@ def signup() -> None:
             st.error(new_user["detail"])
         else:
             st.success(f"Created user with email {new_user['email']}")
-            st.session_state.user = new_user
+            st.query_params.id=user["id"]
         st.rerun()
 
 
