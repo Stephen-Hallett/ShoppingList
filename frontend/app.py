@@ -42,7 +42,6 @@ def login() -> None:
             st.query_params.id=user["id"]
         st.rerun()
 
-
 @st.dialog("Sign Up")
 def signup() -> None:
     username = st.text_input("Username")
@@ -139,7 +138,7 @@ def manage_users(shopping_list: dict) -> None:
             st.rerun()
 
 
-
+@st.fragment
 def delete_item(shopping_list: dict, item: str) -> None:
         _ = requests.delete(
             f"{os.environ['BACKEND_ENDPOINT']}/shoppinglists/{shopping_list['id']}/items/delete",
@@ -147,6 +146,7 @@ def delete_item(shopping_list: dict, item: str) -> None:
             timeout=300,
         ).json()
         st.rerun()
+
 
 def app() -> None:
     header_col1, _, header_col2 = st.columns([1,1,1])
@@ -196,13 +196,14 @@ def app() -> None:
                             add_item(st.session_state.shopping_lists[i])
 
                     for item_id in st.session_state.shopping_lists[i]["items"]:
+                        selected = False
                         with st.container(border=True):
-                            info, button = st.columns([5, 1])
+                            info, button = st.columns([5, 1])                                
                             with info:
                                 item_name = requests.get(
                                     f"{os.environ['BACKEND_ENDPOINT']}/items/{item_id}"
                                 ).json()["name"]
-                                st.markdown(f"**{item_name.strip()}**")
+                                st.checkbox(f"**{item_name.strip()}**" if not st.session_state.get(f"check_{item_name}", False) else f"~~**{item_name.strip()}**~~", key=f"check_{item_name}", value=st.session_state.get(f"check_{item_name}", False))
                             with button:
                                 if st.button(
                                     ":material/delete: Delete",
