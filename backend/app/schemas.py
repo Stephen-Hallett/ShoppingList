@@ -48,8 +48,10 @@ class ShoppingListUpdate(BaseModel):
     members: list | None = None
     items: list | None = None
 
+
 class EmailRequest(BaseModel):
     email: EmailStr
+
 
 class ItemName(BaseModel):
     item: str

@@ -5,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .controller import Controller
 from .schemas import (
+    EmailRequest,
     Item,
     ItemCreate,
+    ItemName,
     ShoppingList,
     ShoppingListCreate,
     ShoppingListUpdate,
@@ -14,8 +16,6 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
-    EmailRequest,
-    ItemName
 )
 
 app = FastAPI()
@@ -112,9 +112,7 @@ async def delete_shoppinglist(shoppinglist_id: str) -> dict:
         raise HTTPException(status_code=404, detail="ShoppingList not found")
 
 
-@app.put(
-    "/shoppinglists/{shoppinglist_id}/members/invite", response_model=ShoppingList
-)
+@app.put("/shoppinglists/{shoppinglist_id}/members/invite", response_model=ShoppingList)
 async def invite_to_shopping(shoppinglist_id: str, email: EmailRequest) -> ShoppingList:
     try:
         return con.invite_to_shopping(shoppinglist_id, email)
@@ -123,26 +121,33 @@ async def invite_to_shopping(shoppinglist_id: str, email: EmailRequest) -> Shopp
             status_code=404, detail=f"Couldn't invite {email} to the shopping list"
         )
 
+
 @app.delete(
     "/shoppinglists/{shoppinglist_id}/members/delete", response_model=ShoppingList
 )
-async def delete_from_shopping(shoppinglist_id: str, email: EmailRequest) -> ShoppingList:
+async def delete_from_shopping(
+    shoppinglist_id: str, email: EmailRequest
+) -> ShoppingList:
     try:
         return con.delete_from_shopping(shoppinglist_id, email)
     except:
         raise HTTPException(
             status_code=404, detail=f"Couldn't remove {email} from the shopping list"
         )
-    
+
+
 @app.delete(
     "/shoppinglists/{shoppinglist_id}/items/delete", response_model=ShoppingList
 )
-async def delete_item_from_shopping(shoppinglist_id: str, item: ItemName) -> ShoppingList:
+async def delete_item_from_shopping(
+    shoppinglist_id: str, item: ItemName
+) -> ShoppingList:
     try:
         return con.delete_item_from_shopping(shoppinglist_id, item)
     except:
         raise HTTPException(
-            status_code=404, detail=f"Couldn't remove {item['item']} from the shopping list"
+            status_code=404,
+            detail=f"Couldn't remove {item['item']} from the shopping list",
         )
 
 

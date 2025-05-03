@@ -9,8 +9,10 @@ from azure.core.exceptions import ResourceExistsError
 from azure.data.tables import TableServiceClient, UpdateMode
 
 from .schemas import (
+    EmailRequest,
     Item,
     ItemCreate,
+    ItemName,
     ShoppingList,
     ShoppingListCreate,
     ShoppingListUpdate,
@@ -18,8 +20,6 @@ from .schemas import (
     User,
     UserCreate,
     UserUpdate,
-    EmailRequest,
-    ItemName
 )
 from .util import log
 
@@ -170,8 +170,10 @@ class Controller:
             for entity in all_entities
             if user_id in [entity["owner"], *entity["members"]]
         ]
-    
-    def invite_to_shopping(self, shoppinglist_id: str, email: EmailRequest):
+
+    def invite_to_shopping(
+        self, shoppinglist_id: str, email: EmailRequest
+    ) -> ShoppingList:
         print(email)
         entity = self.shoppinglists_table_client.get_entity(
             partition_key="shoppinglist", row_key=shoppinglist_id
@@ -189,8 +191,10 @@ class Controller:
             items=json.loads(entity["items"]),
             members=json.loads(entity["members"]),
         )
-    
-    def delete_from_shopping(self, shoppinglist_id: str, email: EmailRequest):
+
+    def delete_from_shopping(
+        self, shoppinglist_id: str, email: EmailRequest
+    ) -> ShoppingList:
         entity = self.shoppinglists_table_client.get_entity(
             partition_key="shoppinglist", row_key=shoppinglist_id
         )
@@ -208,8 +212,10 @@ class Controller:
             items=json.loads(entity["items"]),
             members=json.loads(entity["members"]),
         )
-    
-    def delete_item_from_shopping(self, shoppinglist_id: str, item: ItemName):
+
+    def delete_item_from_shopping(
+        self, shoppinglist_id: str, item: ItemName
+    ) -> ShoppingList:
         entity = self.shoppinglists_table_client.get_entity(
             partition_key="shoppinglist", row_key=shoppinglist_id
         )
@@ -227,7 +233,6 @@ class Controller:
             items=json.loads(entity["items"]),
             members=json.loads(entity["members"]),
         )
-
 
     # Items db
     @log
