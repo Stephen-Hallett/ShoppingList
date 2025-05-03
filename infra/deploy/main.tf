@@ -57,7 +57,6 @@ resource "azurerm_container_app" "backend" {
   }
 
   template {
-    termination_grace_period_seconds = 600
     container {
       name   = "backend"
       image  = "ghcr.io/stephen-hallett/backend:latest"
@@ -107,7 +106,6 @@ resource "azurerm_container_app" "frontend" {
 
 
   template {
-    termination_grace_period_seconds = 600
     container {
       name   = "frontend"
       image  = "ghcr.io/stephen-hallett/frontend:latest"
