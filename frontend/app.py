@@ -202,7 +202,7 @@ def app() -> None:
                                 item_name = requests.get(
                                     f"{os.environ['BACKEND_ENDPOINT']}/items/{item_id}"
                                 ).json()["name"]
-                                st.markdown(f"**{item_name}**")
+                                st.markdown(f"**{item_name.strip()}**")
                             with button:
                                 if st.button(
                                     ":material/delete: Delete",

@@ -78,7 +78,7 @@ class Controller:
         )
 
         if user.name is not None:
-            entity["name"] = user.name
+            entity["name"] = user.name.strip()
 
         self.users_table_client.update_entity(entity=entity, mode=UpdateMode.REPLACE)
         return User(id=user_id, email=entity["email"], name=entity["name"])
@@ -98,11 +98,11 @@ class Controller:
     # ShoppingLists db
     @log
     def create_shoppinglist(self, shoppinglist: ShoppingListCreate) -> ShoppingList:
-        row_key = make_rowid(f"{shoppinglist.name}_{shoppinglist.owner}")
+        row_key = make_rowid(f"{shoppinglist.name.strip()}_{shoppinglist.owner}")
         entity = {
             "PartitionKey": "shoppinglist",
             "RowKey": row_key,
-            "name": shoppinglist.name,
+            "name": shoppinglist.name.strip(),
             "owner": shoppinglist.owner,
             "members": json.dumps(shoppinglist.members),
             "items": json.dumps(shoppinglist.items),
@@ -233,7 +233,7 @@ class Controller:
     @log
     def create_item(self, item: ItemCreate) -> Item:
         row_key = make_rowid(item.name)
-        entity = {"PartitionKey": "item", "RowKey": row_key, "name": item.name}
+        entity = {"PartitionKey": "item", "RowKey": row_key, "name": item.name.strip()}
         try:
             self.items_table_client.create_entity(entity=entity)
             return Item(id=row_key, **item.model_dump())
