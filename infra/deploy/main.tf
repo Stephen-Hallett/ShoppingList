@@ -134,5 +134,75 @@ resource "azurerm_container_app" "frontend" {
     username             = "stephen-hallett"
     password_secret_name = "ghcr-token"
   }
+}
 
+resource "azurerm_storage_share" "weaviate_data" {
+  name               = "weaviatedata"
+  storage_account_id = azurerm_storage_account.sa.id
+  quota              = 5 # in GB — increase as needed
+  enabled_protocol   = "SMB"
+}
+
+
+resource "azurerm_container_app" "weaviate" {
+  name                         = "ca-${var.project_id}-${var.env}-eau-weaviate"
+  container_app_environment_id = azurerm_container_app_environment.cae.id
+  resource_group_name          = data.azurerm_resource_group.rg.name
+  revision_mode                = "Single"
+
+  ingress {
+    external_enabled           = false
+    allow_insecure_connections = false
+    target_port                = 8080
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  template {
+    container {
+      name   = "weaviate"
+      image  = "semitechnologies/weaviate:latest"
+      cpu    = 0.5
+      memory = "1.0Gi"
+
+      env {
+        name  = "QUERY_DEFAULTS_LIMIT"
+        value = "25"
+      }
+
+      env {
+        name  = "AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED"
+        value = "true"
+      }
+
+      env {
+        name  = "PERSISTENCE_DATA_PATH"
+        value = "/var/lib/weaviate"
+      }
+
+      env {
+        name  = "ENABLE_MODULES"
+        value = ""
+      }
+
+      env {
+        name  = "DEFAULT_VECTORIZER_MODULE"
+        value = "none"
+      }
+
+      volume_mounts {
+        name = "weaviate-volume"
+        path = "/var/lib/weaviate"
+      }
+    }
+
+    volume {
+      name = "weaviate-volume"
+
+      storage_name = azurerm_storage_share.weaviate_data.name
+      storage_type = "AzureFile"
+    }
+  }
 }
